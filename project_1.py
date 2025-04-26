@@ -110,17 +110,17 @@ def uniform_cost_search(start_state, map):
     nodes_expanded = 0                                              #initialize nodes_expanded counter
 
     while pq:                                                       #loop for when queue is not empty
-        cost, state, path = heapq.heappop(pq)                             #pop state at front of pq (lowest-cost state)
+        cost, state, path = heapq.heappop(pq)                       #pop state at front of pq (lowest-cost state)
         position, dirty_set = state                                 #capture position and dirty_set from popped state
         visited_state = (position, tuple(sorted(dirty_set)))        #store position and dirty_set (as a sorted tuple) in visited_state
 
         if visited_state in visited and visited[visited_state] <= cost:         #skip state if already visited with a lower cost
             continue
 
-        visited[visited_state] = cost                                #if visited with a lower cost, update cost to new lowest cost
+        visited[visited_state] = cost                               #if visited with a lower cost, update cost to new lowest cost
         nodes_expanded += 1
 
-        if find_goal(state):                                         #if dirty_set empty, return path, nodes_generated, nodes_expanded
+        if find_goal(state):                                        #if dirty_set empty, return path, nodes_generated, nodes_expanded
             return path, nodes_generated, nodes_expanded             
 
         for action, successor in successors(state, map):                        #iterate through successors
@@ -128,4 +128,4 @@ def uniform_cost_search(start_state, map):
             heapq.heappush(pq, (new_cost, successor, path + [action]))          #push new cost, successor, and path into priority queue
             nodes_generated += 1                                                #increment nodes_generated counter
 
-    return None, nodes_generated, nodes_expanded                     #if no solution, return path, nodes_generated, and nodes_expanded
+    return None, nodes_generated, nodes_expanded                    #if no solution, return path, nodes_generated, and nodes_expanded
