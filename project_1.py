@@ -26,12 +26,14 @@ def load_world(filename):
                 elif map[row][column] == '*':                       #determines which cells are dirty
                     dirty_set.add((row, column))                    #adds dirty location to dirty set
 
-    return map, start, dirty_set
+    return map, start, dirty_set                                    #returns map, start, and dirty_set
 
 
 def find_goal(state):
+    
     clean = False                                                   #set clean to False
     position, dirty_set = state                                     #pull dirty_set from current state
+    
     if len(dirty_set) == 0:                                         #if dirty_set is empty
         clean = True                                                #set clean to True
         return clean                                                #return clean
@@ -39,20 +41,36 @@ def find_goal(state):
         return clean                                            
 
 
-def successors(state, grid):
-    # Unpack robot position and dirty set from the state
-    # Initialize an empty list for successor states
-    # Define possible movement directions (N, S, E, W) with their row and column changes
-    # For each direction:
-        # Calculate the new row and column
-        # Check if the move stays inside grid boundaries and isn't blocked
-        # If valid:
-            # Add new state (new robot position, same dirty set) with the action (N/S/E/W)
-    # If the robot is on a dirty tile:
-        # Create a new dirty set without that tile
-        # Add a new state with the 'V' (vacuum) action
-    # Return the list of (action, new state) pairs
-    pass
+def successors(state, map):
+    
+    position, dirty_set = state                                     #unpacks robot position and dirty set from the state
+    successor_states = []                                           #initializes empty list for successor states
+    
+    directions = {                                                  #dictionary with movement choices
+                   'N': (-1, 0),                                    #up movement
+                   'S': (1 ,0),                                     #down movement
+                   'E': (0, 1),                                     #left movement
+                   'W':(0, -1)                                      #right movement
+                                 }
+
+    rows = len(map)                                                 #determines number of rows
+    columns = len(map[0])                                           #determines number of columns
+    row, column = position                                          #determines robot position
+
+    for action, (change_row, change_column) in directions.items():                                          #iterate over directions
+        new_row = row + change_row                                                                          #change row
+        new_column = column + change_column                                                                 #change column
+        if (0 <= new_row < rows) and (0 <= new_column < columns) and map[new_row][new_column] != '#':       #makes sure position is within boundaries
+            new_state = ((new_row, new_column), dirty_set.copy())                                           #creates new state with copy of dirty_set
+            successor_states.append((action, new_state))
+    
+    if position in dirty_set:                                       #check if position is in dirty_set
+        dirty_set_copy = dirty_set.copy()                           #makes a copy of dirty_set
+        dirty_set_copy.remove(position)                             #remove position from dirty_set
+        new_state = (position, dirty_set_copy)                      #create a new state with altered dirty_set
+        successor_states.append(('V',new_state))                    #append state to successor_states with 'V' (vacuum) action
+    
+    return successor_states
 
 
 def depth_first_search(start_state, grid):
