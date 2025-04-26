@@ -49,8 +49,8 @@ def successors(state, map):
     directions = {                                                  #dictionary with movement choices
                    'N': (-1, 0),                                    #up movement
                    'S': (1 ,0),                                     #down movement
-                   'E': (0, 1),                                     #left movement
-                   'W':(0, -1)                                      #right movement
+                   'E': (0, 1),                                     #right movement
+                   'W':(0, -1)                                      #left movement
                                  }
 
     rows = len(map)                                                 #determines number of rows
@@ -73,22 +73,33 @@ def successors(state, map):
     return successor_states
 
 
-def depth_first_search(start_state, grid):
-    # Create a stack to hold (state, path to state)
-    # Create a visited set
-    # Initialize nodes generated and nodes expanded counters
-    # While the stack is not empty:
-        # Pop the top (state, path) from the stack
-        # If state is already visited, continue
-        # Mark the state as visited
-        # Increment nodes expanded
-        # If state is a goal state:
-            # Return path, nodes generated, nodes expanded
-        # For each successor:
-            # Push the successor state and updated path onto the stack
-            # Increment nodes generated
-    # If no solution found, return failure
-    pass
+def depth_first_search(start_state, map):
+
+    stack = [(start_state, [])]                                     #initialize a stack with a starting state and empty path
+    visited = set()                                                 #initialize empty visited set 
+    nodes_generated = 0                                             #initialize nodes_generated counter
+    nodes_expanded = 0                                              #initialize nodes_expanded counter
+
+    while stack is not []:                                          #loop for when stack is not empty
+        state, path = stack.pop()                                   #pop top state and its path from stack
+        position, dirty_set = state                                 #capture position and dirty_set from popped state
+        visited_state = (position, tuple(sorted(dirty_set)))        #store position and dirty_set (as a sorted tuple) in visited_state
+        
+        if visited_state in visited:                                #check if state has already been visited
+            continue                                                #if visited, move on to next state
+
+        visited.add(visited_state)                                  #if not visited, mark state as visited
+        nodes_expanded += 1                                         #increment nodes_expanded counter
+
+        if find_goal(state):                                        #if dirty_set is empty, return the path, nodes generated, and nodes expanded
+            return path, nodes_generated, nodes_expanded 
+
+        for action, successor in successors(state, map):            #iterate through successors
+            stack.append((successor, path + [action]))              #push successor and new path onto the stack
+            nodes_generated += 1                                    #increment nodes_generated counter
+
+    return None, nodes_generated, nodes_expanded                    #if no solution, return path, nodes_generated, and nodes_expanded
+   
 
 
 def uniform_cost_search(start_state, grid):
