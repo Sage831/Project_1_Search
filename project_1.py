@@ -1,5 +1,5 @@
 import sys
-from heapq import heappush, heappop                                 #for Uniform-Cost Search
+import heapq                                                        #for Uniform-Cost Search
 
 
 def load_world(filename):
@@ -80,7 +80,7 @@ def depth_first_search(start_state, map):
     nodes_generated = 0                                             #initialize nodes_generated counter
     nodes_expanded = 0                                              #initialize nodes_expanded counter
 
-    while stack is not []:                                          #loop for when stack is not empty
+    while stack:                                                    #loop for when stack is not empty
         state, path = stack.pop()                                   #pop top state and its path from stack
         position, dirty_set = state                                 #capture position and dirty_set from popped state
         visited_state = (position, tuple(sorted(dirty_set)))        #store position and dirty_set (as a sorted tuple) in visited_state
@@ -102,20 +102,30 @@ def depth_first_search(start_state, map):
    
 
 
-def uniform_cost_search(start_state, grid):
-    # Create a priority queue to hold (cost, state, path)
-    # Create a visited dictionary to track best cost to each state
-    # Initialize nodes generated and nodes expanded counters
-    # While the queue is not empty:
-        # Pop the (lowest cost) state from the queue
-        # If state is already visited with a lower or equal cost, continue
-        # Mark or update the cost in visited
-        # Increment nodes expanded
-        # If state is a goal state:
-            # Return path, nodes generated, nodes expanded
-        # For each successor:
-            # Calculate new cost (current cost + 1)
-            # Push (new cost, successor state, updated path) onto the queue
-            # Increment nodes generated
-    # If no solution found, return failure 
-    pass
+def uniform_cost_search(start_state, map):
+
+    pq = [(0, start_state, [])]                                     #initialize a priority queue for cost, state, and path
+    visited = {}                                                    #initialize empty visited dictionary
+    nodes_generated = 0                                             #initialize nodes_generated counter
+    nodes_expanded = 0                                              #initialize nodes_expanded counter
+
+    while pq:                                                       #loop for when queue is not empty
+        cost, state, path = heapq.heappop(pq)                             #pop state at front of pq (lowest-cost state)
+        position, dirty_set = state                                 #capture position and dirty_set from popped state
+        visited_state = (position, tuple(sorted(dirty_set)))        #store position and dirty_set (as a sorted tuple) in visited_state
+
+        if visited_state in visited and visited[visited_state] <= cost:         #skip state if already visited with a lower cost
+            continue
+
+        visited[visited_state] = cost                                #if visited with a lower cost, update cost to new lowest cost
+        nodes_expanded += 1
+
+        if find_goal(state):                                         #if dirty_set empty, return path, nodes_generated, nodes_expanded
+            return path, nodes_generated, nodes_expanded             
+
+        for action, successor in successors(state, map):                        #iterate through successors
+            new_cost = cost + 1                                                 #increment cost to find new cost
+            heapq.heappush(pq, (new_cost, successor, path + [action]))          #push new cost, successor, and path into priority queue
+            nodes_generated += 1                                                #increment nodes_generated counter
+
+    return None, nodes_generated, nodes_expanded                     #if no solution, return path, nodes_generated, and nodes_expanded
